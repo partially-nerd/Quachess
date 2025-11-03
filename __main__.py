@@ -410,7 +410,7 @@ class Board:
             input()
             return False
 
-        if to_2 is None and piece_being_moved.name.capitalize() == "K":
+        if to_2 is not None and piece_being_moved.name.capitalize() == "K":
             print("Err: King can't be superposed")
             input()
             return False
