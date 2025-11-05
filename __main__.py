@@ -1,3 +1,4 @@
+import enum
 from random import random
 from time import sleep
 from os import system, name as os_name
@@ -89,6 +90,12 @@ class Piece:
                 found.append(i)
 
         return found
+
+    def clear_old_moves(self):
+        for i, branch in enumerate(self.probability_tree):
+            if branch["probability"] == 1:
+                if branch["to_1"] is not None or branch["to_2"] is not None:
+                    self.probability_tree.remove(branch)
 
     def move(
         self, from_1: int, to_1: int, to_2: int | None, k_1: float, k_2: float
@@ -422,6 +429,8 @@ class Board:
         if not moved:
             return moved
 
+        piece_being_moved.clear_old_moves()
+
         for j, piece in enumerate(self.board):
             if piece is None:
                 continue
@@ -435,6 +444,7 @@ class Board:
                     if piece_being_moved is not piece:
                         piece.collapse()
                         piece_being_moved.collapse()
+                        piece.clear_old_moves()
 
                         if (
                             piece.probability_tree[0]["position"]
@@ -474,6 +484,7 @@ class Board:
         )
 
         for row in range(8):
+            row = 7 - row
             lines: list[str] = [
                 f"{Colors.CYELLOW}│{Colors.CEND}",
                 f"{Colors.CYELLOW}│{Colors.CEND}",
@@ -481,6 +492,7 @@ class Board:
             ]
 
             for col in range(8):
+                # col = 7 - col
                 if (col + row) % 2 == 0:
                     lines[0] += (
                         f"{Colors.CBLACKBG}{drawing_board[row * 8 + col].split('\n')[0]:^9}{Colors.CEND}│"
@@ -526,7 +538,9 @@ class Board:
             self.draw()
             print("\n")
 
-            print(f"{Colors.CWHITEBG + Colors.CBLACK + ' White ' + Colors.CEND if self.is_white_move else Colors.CBLACKBG + Colors.CWHITE + ' Black ' + Colors.CEND }'s turn")
+            print(
+                f"{Colors.CWHITEBG + Colors.CBLACK + ' White ' + Colors.CEND if self.is_white_move else Colors.CBLACKBG + Colors.CWHITE + ' Black ' + Colors.CEND}'s turn"
+            )
 
             move: str = input("Enter your move (eg. e2e3e4 or e2e4): ")
 
